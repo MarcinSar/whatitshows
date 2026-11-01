@@ -34,3 +34,13 @@ Support desk. Decision records: whoever signed them.
 ---
 
 Exported 2026-10-04 from the `support` repo, `apps/kb/` → `src/`.
+
+## This copy (MarcinSar/whatitshows)
+
+The desk's export, unchanged in the first commit, plus one signed page about the problems inside `#4471`:
+
+- page: `src/routes/kb/incidents/4471-split/+page.svx` (logic in `src/lib/kb/problems.ts` and `src/lib/kb/ProblemTable.svelte`)
+- the page as the desk sees it: `render/kb/incidents/4471-split.html` (static build of the whole kb in `render/`), screenshot in `screenshots/4471-split.png`
+- tickets: this repo's issues, one per problem
+
+Build frame added around `src/` (the export ships `src/` only): `package.json`, `svelte.config.js`, `vite.config.js`, `src/app.html`, `src/routes/+layout.js`. Rebuild with `npm install && npm run build`.

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../../_app/immutable/entry/start.K52WMYcc.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/DqPDwnK_.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/BPd7gKW2.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/Cxu6bXEM.js" rel="modulepreload">
+		<link href="../../_app/immutable/entry/app.BKshCnJi.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/DNc_lyN1.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/BTd7A2sG.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/B08GkHOn.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/C_u0HPsC.js" rel="modulepreload">
+		<link href="../../_app/immutable/nodes/0.B8Glx86V.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/BYNdjNWW.js" rel="modulepreload">
+		<link href="../../_app/immutable/nodes/5.B99fCQ0q.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/-7YSk24A.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/YiPN5UHl.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/DhCOT1li.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/iXLSwIXB.js" rel="modulepreload">
+		<!--e2jw2j--><!----><title>#4471 · what the reports show · support kb</title>
+		<link href="../../_app/immutable/assets/runbook.BhhgOc_n.css" rel="stylesheet">
+		<link href="../../_app/immutable/assets/Callout.yLErXQDM.css" rel="stylesheet">
+		<link href="../../_app/immutable/assets/5.DFwFgLFh.css" rel="stylesheet">
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents"><!--[--><!--[0--><!--[--><!--[--><div class="kb svelte-e2jw2j"><header><a class="crumb svelte-e2jw2j" href="/kb">support desk · kb</a> <h1 class="svelte-e2jw2j">#4471 · what the reports show</h1> <p class="meta svelte-e2jw2j"><span>owner <b>MarcinSar</b></span> <span class="status open svelte-e2jw2j">open</span> <span class="svelte-e2jw2j">reviewed 2026-11-01 · 0 days ago</span></p></header> <!--[-1--><!--]--> <main><p><a href="/kb/incidents/4471">#4471</a> was merged on subject lines (<a href="/kb/decisions/0001-dedupe-by-subject">decision 0001</a>),
+so it reads as one bug about dates. Read what each report shows, and where it came from, and it
+splits into separate problems. Each has its own fix and its own ticket.</p> <aside class="warn svelte-17bri61"><!---->The fix queued for #4471 fixes the parser. It does not touch the other problems below.<!----></aside><!----> <h2>The problems</h2> <p class="sum svelte-1op6c6"><strong>412</strong> reports merged into #4471 · <strong>3</strong> problems</p> <table><thead><tr><th>problem</th><th>reports</th><th>tenants</th><th>came in by</th><th>seen</th><th>ticket</th></tr></thead><tbody><!--[--><tr><td><code>parser</code></td><td><strong>374</strong></td><td>11</td><td class="muted svelte-1op6c6">app ×202 · email ×147 · form ×25</td><td>2026-04-01 → 2026-10-04</td><td><!--[0--><a href="https://github.com/MarcinSar/whatitshows/issues/1">MarcinSar/whatitshows#1</a><!--]--></td></tr><tr><td><code>hint</code></td><td><strong>33</strong></td><td>3</td><td class="muted svelte-1op6c6">form ×33</td><td>2026-04-17 → 2026-09-22</td><td><!--[0--><a href="https://github.com/MarcinSar/whatitshows/issues/2">MarcinSar/whatitshows#2</a><!--]--></td></tr><tr><td><code>one-day</code></td><td><strong>5</strong></td><td>5</td><td class="muted svelte-1op6c6">email ×3 · app ×2</td><td>2026-04-02 → 2026-10-04</td><td><!--[0--><a href="https://github.com/MarcinSar/whatitshows/issues/3">MarcinSar/whatitshows#3</a><!--]--></td></tr><!--]--></tbody></table> <p class="check svelte-1op6c6">412 of 412 reports placed, each in one problem · data: reports received up to 2026-10-04</p><!----> <h2>What each one shows</h2> <h3><code>parser</code>: the shared parser reads the month first</h3> <p>The report shows a day and a month swapped: “Our 7 April reminder went out on 4 July.” The tenant
+writes the day first, and the report came in by app, by email, or through a booking-v2 form, whose
+hint asks for <code>DD/MM/YYYY</code>. People typed the date their way. The shared parser read it month
+first. This is the bug #4471 names, and the queued fix is for it.</p> <h3><code>hint</code>: booking-v3’s form asks for the month first</h3> <p>The report shows the same swap, so it sounds the same. It only comes through the booking form, at
+day-first tenants that run booking-v3. That form prints <code>MM/DD/YYYY</code> under its date field, so
+people type the month first, and the form then reads the date the tenant’s way, day first. A
+parser fix does not reach it. The hint, or the way the form reads it, has to follow the tenant’s
+locale.</p> <h3><code>one-day</code>: the date moves by one day</h3> <p>The report shows no swap. “Invite says Tuesday 12 May. Calendar says Monday 11 May.” “Client in
+Lisbon got Tuesday. Client in Toronto got Monday. Same meeting.” “The invite arrived before I made
+the booking.” The day moves by one, or differs between time zones: a time-zone conversion of the
+date, not its order. Neither the parser fix nor the hint fix touches it. The desk already noted
+these reports as a one-day move (<code>desk-notes.json</code>); the #4471 page files them under <code>parser</code> by tenant and footnotes them.</p> <h2>How the reports were split</h2> <ul><li>One report counts once. The export comes in pages that overlap, so the same report can appear
+twice; it is counted by id.</li> <li>The cause comes from the tenant (its locale and its booking form) and the channel, as <code>causes.ts</code> decides it. Not from the intake tag, which is a guess from the reporter’s browser,
+and not from the subject line, which is how everything ended up in #4471.</li> <li>Reports the desk noted as a one-day move are their own problem, whichever tenant sent them.</li> <li>Every report merged into #4471 lands in exactly one problem. The table checks that the counts
+add up to the ticket.</li></ul> <p>The counts come from the data at render time. When the desk merges more reports into #4471, or
+notes another one-day move, render the page again; the counts follow.</p> <h2>Sources</h2> <p>Reports, desk notes and tenants from the desk’s kb export of 4 October 2026
+(<code>kb-export-267efc5e.zip</code>), read on 1 November 2026. Rules from <code>src/lib/kb/causes.ts</code>, unchanged;
+the split from <code>src/lib/kb/problems.ts</code>. Written by MarcinSar with his harness (Claude Opus 5.5).</p> <!--[0--><p class="stamp svelte-1280m42">desk ref <b class="svelte-1280m42">DR-M7QD-2WZQ</b></p><!--]--><!----><!----></main> <footer class="svelte-e2jw2j">Pages are written by people. Tables and charts are built from data at render time.</footer></div><!--]--><!----><!--]--><!--]--> <!--[-1--><!--]--><!--]-->
+			
+			<script>
+				{
+					__sveltekit_1g16ltn = {
+						base: new URL("../..", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("../../_app/immutable/entry/start.K52WMYcc.js"),
+						import("../../_app/immutable/entry/app.BKshCnJi.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 5],
+							data: [null,null],
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+  </body>
+</html>
