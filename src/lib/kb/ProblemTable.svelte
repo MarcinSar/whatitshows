@@ -9,12 +9,12 @@
   let { ticket, repo, issues = {} }: { ticket: number; repo: string; issues?: Partial<Record<Problem, number>> } = $props();
 
   const split = $derived(problemsIn(reports as Report[], ticket, tenantOf, notes.oneDayMove));
-  const placed = $derived(split.groups.reduce((n, g) => n + g.reports.length, 0));
+  const filed = $derived(split.groups.filter((g) => !g.filedUnder).reduce((n, g) => n + g.reports.length, 0));
   const received = $derived(split.merged.map((r) => r.receivedAt.slice(0, 10)).sort().at(-1));
-  const channels = (c: Record<string, number>) =>
+  const list = (c: Record<string, number>) =>
     Object.entries(c)
       .sort((a, b) => b[1] - a[1])
-      .map(([ch, n]) => `${ch} ×${n}`)
+      .map(([k, n]) => `${k} ×${n}`)
       .join(' · ');
 </script>
 
@@ -34,7 +34,7 @@
         <td><code>{g.problem}</code></td>
         <td><strong>{g.reports.length}</strong></td>
         <td>{g.tenants}</td>
-        <td class="muted">{channels(g.channels)}</td>
+        <td class="muted">{list(g.channels)}</td>
         <td>{g.firstSeen} → {g.lastSeen}</td>
         <td>
           {#if issues[g.problem]}
@@ -48,12 +48,19 @@
   </tbody>
 </table>
 
-<p class="check" class:warn={placed !== split.merged.length}>
-  {placed} of {split.merged.length} reports placed, each in one problem · data: reports received up to {received}
+{#each split.groups.filter((g) => g.filedUnder) as g (g.problem)}
+  <p class="note">
+    The {g.reports.length} <code>{g.problem}</code> reports are also counted where the desk files them, by tenant:
+    {list(g.filedUnder ?? {})}.
+  </p>
+{/each}
+
+<p class="check" class:warn={filed !== split.merged.length}>
+  {filed} of {split.merged.length} reports filed under one cause each · data: reports received up to {received}
 </p>
 
 <style>
   .sum { font-size: 1.1rem; }
-  .muted, .check { color: var(--muted); font-size: 0.85em; }
+  .muted, .check, .note { color: var(--muted); font-size: 0.85em; }
   .warn { color: var(--warn); font-weight: 600; }
 </style>

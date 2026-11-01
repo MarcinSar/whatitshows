@@ -66,8 +66,10 @@ by tenant and footnotes them.
   `causes.ts` decides it. Not from the intake tag, which is a guess from the reporter's browser,
   and not from the subject line, which is how everything ended up in #4471.
 - Reports the desk noted as a one-day move are their own problem, whichever tenant sent them.
-- Every report merged into #4471 lands in exactly one problem. The table checks that the counts
-  add up to the ticket.
+- The counts follow the desk's own view, the cause table on the #4471 page: every report merged
+  into #4471 is filed under one cause, by tenant, and counted there. The one-day reports keep
+  their place under `parser` and are counted again in their own row. The table checks that the
+  causes add up to the ticket.
 
 The counts come from the data at render time. When the desk merges more reports into #4471, or
 notes another one-day move, render the page again; the counts follow.
