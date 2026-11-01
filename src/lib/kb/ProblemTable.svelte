@@ -6,11 +6,21 @@
   import { problemsIn, type Problem } from '#lib/kb/problems';
 
   // `issues`: where each problem is tracked, problem → issue number in `repo`.
-  let { ticket, repo, issues = {} }: { ticket: number; repo: string; issues?: Partial<Record<Problem, number>> } = $props();
+  // `states`: where each problem stands, problem → state (the page says where the states come from).
+  let {
+    ticket,
+    repo,
+    issues = {},
+    states = {},
+  }: { ticket: number; repo: string; issues?: Partial<Record<Problem, number>>; states?: Partial<Record<Problem, string>> } = $props();
 
   const split = $derived(problemsIn(reports as Report[], ticket, tenantOf, notes.oneDayMove));
   const filed = $derived(split.groups.filter((g) => !g.filedUnder).reduce((n, g) => n + g.reports.length, 0));
   const received = $derived(split.merged.map((r) => r.receivedAt.slice(0, 10)).sort().at(-1));
+  // Reports counted under a cause that show another problem: cause → [problem, count].
+  const alsoShow = $derived(
+    split.groups.flatMap((g) => Object.entries(g.filedUnder ?? {}).map(([cause, n]) => ({ cause, problem: g.problem, n }))),
+  );
   const list = (c: Record<string, number>) =>
     Object.entries(c)
       .sort((a, b) => b[1] - a[1])
@@ -26,15 +36,26 @@
 
 <table>
   <thead>
-    <tr><th>problem</th><th>reports</th><th>tenants</th><th>came in by</th><th>seen</th><th>ticket</th></tr>
+    <tr><th>problem</th><th>state</th><th>reports</th><th>counted from</th><th>tenants</th><th>seen</th><th>ticket</th></tr>
   </thead>
   <tbody>
     {#each split.groups as g (g.problem)}
       <tr>
         <td><code>{g.problem}</code></td>
+        <td class="state {states[g.problem] ?? 'none'}">{states[g.problem] ?? '—'}</td>
         <td><strong>{g.reports.length}</strong></td>
+        <td class="muted">
+          {#if g.filedUnder}
+            desk notes (<code>oneDayMove</code>), checked against what each report says
+          {:else}
+            the desk's cause table, by tenant
+            {#each alsoShow.filter((a) => a.cause === g.problem) as a (a.problem)}
+              · includes {a.n} that show <code>{a.problem}</code>
+            {/each}
+          {/if}
+          · export, reports to {received}
+        </td>
         <td>{g.tenants}</td>
-        <td class="muted">{list(g.channels)}</td>
         <td>{g.firstSeen} → {g.lastSeen}</td>
         <td>
           {#if issues[g.problem]}
@@ -51,16 +72,19 @@
 {#each split.groups.filter((g) => g.filedUnder) as g (g.problem)}
   <p class="note">
     The {g.reports.length} <code>{g.problem}</code> reports are also counted where the desk files them, by tenant:
-    {list(g.filedUnder ?? {})}.
+    {list(g.filedUnder ?? {})}. Came in by {list(g.channels)}.
   </p>
 {/each}
 
 <p class="check" class:warn={filed !== split.merged.length}>
-  {filed} of {split.merged.length} reports filed under one cause each · data: reports received up to {received}
+  {filed} of {split.merged.length} reports filed under one cause each · counts from the desk's export, reports received up to {received}
 </p>
 
 <style>
   .sum { font-size: 1.1rem; }
   .muted, .check, .note { color: var(--muted); font-size: 0.85em; }
   .warn { color: var(--warn); font-weight: 600; }
+  .state { white-space: nowrap; font-weight: 600; }
+  .state.open { color: var(--warn); }
+  .state.fixed { color: var(--accent); }
 </style>

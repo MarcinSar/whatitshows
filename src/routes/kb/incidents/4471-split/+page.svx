@@ -7,11 +7,13 @@ reviewed: 2026-11-01
 signature: v1.eyJzdWIiOiIyMzI2IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTM1MzkyNDUsImV4cCI6MTc5MzYyNTY0NX0.tlVAzcxk0FNYkZssQCSRLg_aR-idly-KE3Nlc6J3dBg
 written_by: MarcinSar, with his harness (Claude Opus 5.5)
 data_as_of: 2026-10-04
+states_as_of: 2026-11-01
 sources:
   - src/lib/data/reports-4471.json (desk export of 2026-10-04, kb-export-267efc5e.zip)
   - src/lib/data/desk-notes.json (reports the desk read as a one-day move)
   - src/lib/data/tenants/*.json (locale and booking form per tenant)
   - src/lib/kb/causes.ts (which bug swapped a date)
+  - engineering update on #4471, closed 2026-10-05 (desk update on the challenge page, read 2026-11-01)
 ---
 
 <script>
@@ -25,12 +27,23 @@ so it reads as one bug about dates. Read what each report shows, and where it ca
 splits into separate problems. Each has its own fix and its own ticket.
 
 <Callout kind="warn">
-The fix queued for #4471 fixes the parser. It does not touch the other problems below.
+#4471 was closed on 5 October 2026. <code>parser</code> is fixed (<code>fix(dates): parse dd/mm for eu locales</code>).
+<code>hint</code> will not be fixed: the booking-v3 form was retired. <code>one-day</code> is not covered by that update
+and stays open.
 </Callout>
 
-## The problems
+## Where each problem stands
 
-<ProblemTable ticket={4471} repo="MarcinSar/whatitshows" issues={{ parser: 1, hint: 2, 'one-day': 3 }} />
+<ProblemTable ticket={4471} repo="MarcinSar/whatitshows" issues={{ parser: 1, hint: 2, 'one-day': 3 }} states={{ parser: 'fixed', hint: 'not planned', 'one-day': 'open' }} />
+
+- **Fixed:** `parser`. Its count is the desk's, by tenant, so it includes the reports that show a
+  one-day move.
+- **Not planned:** `hint`. The booking-v3 form was retired.
+- **Open:** `one-day`. A different symptom, not explained by the dd/mm fix.
+
+Where the numbers come from, and how current they are: every count is computed from the desk's
+export of 4 October 2026, at render time; each row says which view it counts with. The states come
+from the engineering update that closed #4471 on 5 October 2026, read on 1 November 2026.
 
 ## What each one shows
 
@@ -39,24 +52,27 @@ The fix queued for #4471 fixes the parser. It does not touch the other problems 
 The report shows a day and a month swapped: "Our 7 April reminder went out on 4 July." The tenant
 writes the day first, and the report came in by app, by email, or through a booking-v2 form, whose
 hint asks for `DD/MM/YYYY`. People typed the date their way. The shared parser read it month
-first. This is the bug #4471 names, and the queued fix is for it.
+first. This is the bug #4471 names. **Fixed** on 5 October 2026: `fix(dates): parse dd/mm for eu
+locales`.
 
 ### `hint`: booking-v3's form asks for the month first
 
 The report shows the same swap, so it sounds the same. It only comes through the booking form, at
 day-first tenants that run booking-v3. That form prints `MM/DD/YYYY` under its date field, so
 people type the month first, and the form then reads the date the tenant's way, day first. A
-parser fix does not reach it. The hint, or the way the form reads it, has to follow the tenant's
-locale.
+parser fix does not reach it. **Not planned:** the booking-v3 form was retired, so no new reports
+can come this way.
 
 ### `one-day`: the date moves by one day
 
 The report shows no swap. "Invite says Tuesday 12 May. Calendar says Monday 11 May." "Client in
 Lisbon got Tuesday. Client in Toronto got Monday. Same meeting." "The invite arrived before I made
 the booking." The day moves by one, or differs between time zones: a time-zone conversion of the
-date, not its order. Neither the parser fix nor the hint fix touches it. The desk already noted
-these reports as a one-day move (`desk-notes.json`); the #4471 page files them under `parser`
-by tenant and footnotes them.
+date, not its order. Every one comes from an EU tenant that writes the day first, by app or email.
+The desk already noted these reports as a one-day move (`desk-notes.json`), and still counts them
+under `parser` by tenant. **Open:** what they show is a different symptom, and the dd/mm fix does
+not explain it. It stays open until it is confirmed: one-day reports that arrive after 5 October
+would confirm it.
 
 ## How the reports were split
 
